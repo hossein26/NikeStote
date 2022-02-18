@@ -1,5 +1,6 @@
 package com.hossein.nikestore.feature.main
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.hossein.nikestore.common.NikeViewModel
 import com.hossein.nikestore.data.Product
@@ -10,13 +11,15 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
-class MainViewModel(productRepository: ProductRepository): NikeViewModel() {
+class MainViewModel(productRepository: ProductRepository) : NikeViewModel() {
     val productsLiveData = MutableLiveData<List<Product>>()
     init {
+        progressBarLiveData.value = true
         productRepository.getProducts()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object: SingleObserver<List<Product>>{
+            .doFinally { progressBarLiveData.value = false }
+            .subscribe(object : SingleObserver<List<Product>> {
                 override fun onSubscribe(d: Disposable) {
                     compositeDisposable.add(d)
                 }
