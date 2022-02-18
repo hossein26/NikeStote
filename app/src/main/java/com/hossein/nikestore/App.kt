@@ -1,8 +1,11 @@
 package com.hossein.nikestore
 
 import android.app.Application
+import com.hossein.nikestore.data.repo.BannerRepository
+import com.hossein.nikestore.data.repo.BannerRepositoryImpl
 import com.hossein.nikestore.data.repo.ProductRepository
 import com.hossein.nikestore.data.repo.ProductRepositoryImpl
+import com.hossein.nikestore.data.repo.source.BannerRemoteDataSource
 import com.hossein.nikestore.data.repo.source.ProductLocalDataSource
 import com.hossein.nikestore.data.repo.source.ProductRemoteDataSource
 import com.hossein.nikestore.feature.main.MainViewModel
@@ -17,7 +20,7 @@ import timber.log.Timber
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        Timber.plant()
+        Timber.plant(Timber.DebugTree())
 
         val myModules = module {
 
@@ -28,7 +31,10 @@ class App : Application() {
                     ProductLocalDataSource()
                 )
             }
-            viewModel { MainViewModel(get()) }
+            factory<BannerRepository> {
+                BannerRepositoryImpl(BannerRemoteDataSource(get()))
+            }
+            viewModel { MainViewModel(get(), get()) }
         }
 
         startKoin {
